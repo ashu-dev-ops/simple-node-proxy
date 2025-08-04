@@ -108,7 +108,7 @@ app.use(async (req, res) => {
     const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
     const targetUrl = isBlogsPath
       ? `http://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
-      : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
+      : `https://frabjous-strudel-679542.netlify.app${originalUrl.pathname}${originalUrl.search}`;
 
     // Check cache first
     const cacheKey = getCacheKey(targetUrl);
