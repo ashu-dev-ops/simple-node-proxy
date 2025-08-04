@@ -149,7 +149,6 @@ function setCache(key, data, contentType) {
     duration,
   });
 }
-app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 app.use(async (req, res) => {
   // Check concurrent request limit
@@ -197,8 +196,8 @@ app.use(async (req, res) => {
     const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
     const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
     const targetUrl = isBlogsPath
-      ? `http://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
-      : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
+      ? `https://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
+      : `https://frabjous-strudel-679542.netlify.app${originalUrl.pathname}${originalUrl.search}`;
 
     // Check cache first
     const cacheKey = getCacheKey(targetUrl);
@@ -246,27 +245,14 @@ app.use(async (req, res) => {
     if (isHtmlContent(contentType)) {
       const currentDomain = `${req.protocol}://${req.get("host")}`;
 
-      // body = body
-      //   .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
-      //   .replace(
-      //     /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
-      //     "https://simple-node-proxy-up64.onrender.com"
-      //   )
-      //   .replace(/http:\/\/sheetwa\.com/g, currentDomain)
-      //   .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
-        
-
-        body = body
-          .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
-          .replace(
-            /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
-            currentDomain
-          ) // fixes favicon
-          .replace(/http:\/\/sheetwa\.com/g, currentDomain)
-          .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain)
-          .replace(/href=["']http:\/\/[^"']*favicon\.ico["']/g, (match) =>
-            match.replace("http://", "https://")
-          );
+      body = body
+        .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
+        .replace(
+          /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
+          "https://simple-node-proxy-up64.onrender.com"
+        )
+        .replace(/http:\/\/sheetwa\.com/g, currentDomain)
+        .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
     }
 
     // Preserve important response headers
