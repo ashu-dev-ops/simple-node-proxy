@@ -245,18 +245,27 @@ app.use(async (req, res) => {
     if (isHtmlContent(contentType)) {
       const currentDomain = `${req.protocol}://${req.get("host")}`;
 
-      body = body
-        .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
-        .replace(
-          /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
-          "https://simple-node-proxy-up64.onrender.com"
-        )
-        .replace(/http:\/\/sheetwa\.com/g, currentDomain)
-        .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
-      body = body.replace(
-        /<link\s+rel=["']icon["']\s+href=["']http:\/\//g,
-        '<link rel="icon" href="https://'
-      );
+      // body = body
+      //   .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
+      //   .replace(
+      //     /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
+      //     "https://simple-node-proxy-up64.onrender.com"
+      //   )
+      //   .replace(/http:\/\/sheetwa\.com/g, currentDomain)
+      //   .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
+        
+
+        body = body
+          .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
+          .replace(
+            /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
+            currentDomain
+          ) // fixes favicon
+          .replace(/http:\/\/sheetwa\.com/g, currentDomain)
+          .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain)
+          .replace(/href=["']http:\/\/[^"']*favicon\.ico["']/g, (match) =>
+            match.replace("http://", "https://")
+          );
     }
 
     // Preserve important response headers
