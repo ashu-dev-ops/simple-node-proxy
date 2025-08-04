@@ -149,6 +149,7 @@ function setCache(key, data, contentType) {
     duration,
   });
 }
+app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 app.use(async (req, res) => {
   // Check concurrent request limit
