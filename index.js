@@ -28,10 +28,16 @@ app.use(async (req, res) => {
     return res.redirect(301, redirectMap[path]);
   }
 
-  if (path === "/blogs/index.txt/") {
-    return res.redirect(301, "/blogs/");
-  }
+  //   if (path === "/blogs/index.txt/") {
+  //     return res.redirect(301, "/blogs/");
+  //   }
+  const indexTxtRegex = /\/index\.txt\/?$/;
 
+  if (indexTxtRegex.test(path)) {
+    const cleanedPath = path.replace(indexTxtRegex, " ");
+    originalUrl.pathname = cleanedPath;
+    return res.redirect(301, originalUrl.toString());
+  }
   if (
     path.startsWith("/blogs") &&
     (originalUrl.searchParams.has("teamId") ||
