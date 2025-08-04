@@ -76,6 +76,10 @@ app.use(async (req, res) => {
 
       res.set("Content-Type", contentType);
       res.status(proxyRes.status).send(body);
+    } catch (err) {
+      console.error("Proxy failed:", err);
+      res.status(500).send("Proxy Error");
+    }
   }
 });
 
