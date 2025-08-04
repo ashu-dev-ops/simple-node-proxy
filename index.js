@@ -246,13 +246,36 @@ app.use(async (req, res) => {
       const currentDomain = `${req.protocol}://${req.get("host")}`;
 
       body = body
+        // Fix existing replacements
         .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
         .replace(
           /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
           "https://simple-node-proxy-up64.onrender.com"
         )
         .replace(/http:\/\/sheetwa\.com/g, currentDomain)
-        .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
+        .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain)
+
+        // Fix the main issue: convert HTTP blogstest.sheetwa.com to HTTPS
+        .replace(
+          /http:\/\/blogstest\.sheetwa\.com/g,
+          "https://blogstest.sheetwa.com"
+        )
+
+        // Fix any remaining HTTP references that should be HTTPS
+        .replace(/src="http:\/\//g, 'src="https://')
+        .replace(/href="http:\/\//g, 'href="https://')
+        .replace(/url\("http:\/\//g, 'url("https://')
+        .replace(/url\('http:\/\//g, "url('https://")
+
+        // Fix specific cases for fonts, CSS, and other assets
+        .replace(
+          /"http:\/\/([^"]*\.(woff2?|ttf|eot|otf|css|js))"/g,
+          '"https://$1"'
+        )
+        .replace(
+          /'http:\/\/([^']*\.(woff2?|ttf|eot|otf|css|js))'/g,
+          "'https://$1'"
+        );
     }
 
     // Preserve important response headers
