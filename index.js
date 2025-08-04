@@ -44,7 +44,7 @@ app.use(async (req, res) => {
   const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
   const targetUrl = isBlogsPath
     ? `https://sheetwa22.getpowerblog.com${proxyPath}${originalUrl.search}`
-    : "https://sheetwa.com/";
+    : "https://test.sheetwa.com/";
 
   try {
     const proxyRes = await fetch(targetUrl, {
@@ -56,16 +56,21 @@ app.use(async (req, res) => {
     const contentType = proxyRes.headers.get("content-type") || "text/html";
     let body = await proxyRes.text();
 
-    // Replace insecure http links with https
+    // More comprehensive URL replacement to fix mixed content issues
+    const currentDomain = `${req.protocol}://${req.get("host")}`;
+
     body = body
-      .replace(
-        /http:\/\/sheetwa22\.getpowerblog\.com/g,
-        "https://simple-node-proxy-up64.onrender.com"
-      )
+      // Replace any HTTP references to the blog domain
+      .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
+      // Replace any HTTP references to your proxy domain
       .replace(
         /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
         "https://simple-node-proxy-up64.onrender.com"
-      );
+      )
+      // Replace any HTTP references to the main domain (for root content)
+      .replace(/http:\/\/sheetwa\.com/g, currentDomain)
+      // Catch any remaining HTTP references to your current domain
+      .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
 
     res.set("Content-Type", contentType);
     res.status(proxyRes.status).send(body);
