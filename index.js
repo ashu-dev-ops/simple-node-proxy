@@ -91,8 +91,6 @@
 //   console.log(`Render proxy server running on port ${PORT}`);
 // });
 
-
-
 const express = require("express");
 const fetch = require("node-fetch"); // npm install node-fetch@2
 const app = express();
@@ -119,7 +117,7 @@ const redirectMap = {
 
 // Helper function to check if content type is HTML
 function isHtmlContent(contentType) {
-  return contentType && contentType.includes('text/html');
+  return contentType && contentType.includes("text/html");
 }
 
 // Helper function to check if content is static asset
@@ -148,7 +146,7 @@ function setCache(key, data, contentType) {
   cache.set(key, {
     ...data,
     timestamp: Date.now(),
-    duration
+    duration,
   });
 }
 
@@ -204,7 +202,7 @@ app.use(async (req, res) => {
     // Check cache first
     const cacheKey = getCacheKey(targetUrl);
     const cached = getFromCache(cacheKey);
-    
+
     if (cached) {
       res.set("Content-Type", cached.contentType);
       // Forward cached headers
@@ -219,13 +217,13 @@ app.use(async (req, res) => {
     // Forward essential headers
     const forwardHeaders = {
       "User-Agent": req.headers["user-agent"] || "",
-      "Accept": req.headers["accept"] || "*/*",
+      Accept: req.headers["accept"] || "*/*",
       "Accept-Encoding": req.headers["accept-encoding"] || "",
-      "Referer": req.headers["referer"] || "",
+      Referer: req.headers["referer"] || "",
     };
 
     // Remove empty headers
-    Object.keys(forwardHeaders).forEach(key => {
+    Object.keys(forwardHeaders).forEach((key) => {
       if (!forwardHeaders[key]) delete forwardHeaders[key];
     });
 
@@ -235,7 +233,7 @@ app.use(async (req, res) => {
 
     const proxyRes = await fetch(targetUrl, {
       headers: forwardHeaders,
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
@@ -255,23 +253,36 @@ app.use(async (req, res) => {
         )
         .replace(/http:\/\/sheetwa\.com/g, currentDomain)
         .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
+      body = body.replace(
+        /<link\s+rel=["']icon["']\s+href=["']http:\/\//g,
+        '<link rel="icon" href="https://'
+      );
     }
 
     // Preserve important response headers
     const headersToForward = {};
-    const importantHeaders = ['cache-control', 'etag', 'expires', 'last-modified'];
-    importantHeaders.forEach(header => {
+    const importantHeaders = [
+      "cache-control",
+      "etag",
+      "expires",
+      "last-modified",
+    ];
+    importantHeaders.forEach((header) => {
       const value = proxyRes.headers.get(header);
       if (value) headersToForward[header] = value;
     });
 
     // Cache the response
-    setCache(cacheKey, {
-      body,
-      status: proxyRes.status,
-      contentType,
-      headers: headersToForward
-    }, contentType);
+    setCache(
+      cacheKey,
+      {
+        body,
+        status: proxyRes.status,
+        contentType,
+        headers: headersToForward,
+      },
+      contentType
+    );
 
     // Set response headers
     res.set("Content-Type", contentType);
@@ -280,10 +291,9 @@ app.use(async (req, res) => {
     });
 
     res.status(proxyRes.status).send(body);
-
   } catch (err) {
     console.error("Proxy failed:", err);
-    if (err.name === 'AbortError') {
+    if (err.name === "AbortError") {
       res.status(504).send("Gateway Timeout");
     } else {
       res.status(500).send("Proxy Error");
