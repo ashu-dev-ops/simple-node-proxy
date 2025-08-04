@@ -44,7 +44,7 @@ app.use(async (req, res) => {
   const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
   const targetUrl = isBlogsPath
     ? `https://sheetwa22.getpowerblog.com${proxyPath}${originalUrl.search}`
-    : "https://test.sheetwa.com/";
+    : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
 
   try {
     const proxyRes = await fetch(targetUrl, {
