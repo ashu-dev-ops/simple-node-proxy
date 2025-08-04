@@ -34,7 +34,7 @@ app.use(async (req, res) => {
   const indexTxtRegex = /\/index\.txt\/?$/;
 
   if (indexTxtRegex.test(path)) {
-    const cleanedPath = path.replace(indexTxtRegex, " ");
+    const cleanedPath = path.replace(indexTxtRegex, "");
     originalUrl.pathname = cleanedPath;
     return res.redirect(301, originalUrl.toString());
   }
