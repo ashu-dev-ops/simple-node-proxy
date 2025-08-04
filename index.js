@@ -196,7 +196,7 @@ app.use(async (req, res) => {
     const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
     const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
     const targetUrl = isBlogsPath
-      ? `http://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
+      ? `https://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
       : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
 
     // Check cache first
