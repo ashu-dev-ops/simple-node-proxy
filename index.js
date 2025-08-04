@@ -40,46 +40,38 @@ app.use(async (req, res) => {
     return res.status(404).send("Not Found");
   }
 
-  if (path === "/blogs/" || path.startsWith("/blogs/")) {
-    const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
+  const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
+  const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
+  const targetUrl = isBlogsPath
+    ? `https://sheetwa22.getpowerblog.com${proxyPath}${originalUrl.search}`
+    : "https://sheetwa.com/";
 
-    const targetUrl = `https://sheetwa22.getpowerblog.com${proxyPath}${originalUrl.search}`;
+  try {
+    const proxyRes = await fetch(targetUrl, {
+      headers: {
+        "User-Agent": req.headers["user-agent"] || "",
+      },
+    });
 
-    try {
-      const proxyRes = await fetch(targetUrl, {
-        headers: {
-          "User-Agent": req.headers["user-agent"] || "",
-        },
-      });
+    const contentType = proxyRes.headers.get("content-type") || "text/html";
+    let body = await proxyRes.text();
 
-      const contentType = proxyRes.headers.get("content-type") || "text/html";
-      const body = await proxyRes.text();
+    // Replace insecure http links with https
+    body = body
+      .replace(
+        /http:\/\/sheetwa22\.getpowerblog\.com/g,
+        "https://simple-node-proxy-up64.onrender.com"
+      )
+      .replace(
+        /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
+        "https://simple-node-proxy-up64.onrender.com"
+      );
 
-      res.set("Content-Type", contentType);
-      res.status(proxyRes.status).send(body);
-    } catch (err) {
-      console.error("Proxy failed:", err);
-      res.status(500).send("Proxy Error");
-    }
-  } else {
-    const targetUrl = `https://sheetwa.com/`;
-
-    try {
-      const proxyRes = await fetch(targetUrl, {
-        headers: {
-          "User-Agent": req.headers["user-agent"] || "",
-        },
-      });
-
-      const contentType = proxyRes.headers.get("content-type") || "text/html";
-      const body = await proxyRes.text();
-
-      res.set("Content-Type", contentType);
-      res.status(proxyRes.status).send(body);
-    } catch (err) {
-      console.error("Proxy failed:", err);
-      res.status(500).send("Proxy Error");
-    }
+    res.set("Content-Type", contentType);
+    res.status(proxyRes.status).send(body);
+  } catch (err) {
+    console.error("Proxy failed:", err);
+    res.status(500).send("Proxy Error");
   }
 });
 
