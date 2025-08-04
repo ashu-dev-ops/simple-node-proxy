@@ -1,4 +1,95 @@
+// const express = require("express");
+// const fetch = require("node-fetch"); // npm install node-fetch@2
+// const app = express();
 
+// const redirectMap = {
+//   "/bulk-whatsapp-marketing/dubai/": "/bulk-whatsapp-marketing-uae/dubai/",
+//   "/bulk-whatsapp-marketing/sharjah/": "/bulk-whatsapp-marketing-uae/sharjah/",
+//   "/bulk-whatsapp-marketing/abu-dhabi/":
+//     "/bulk-whatsapp-marketing-uae/abu-dhabi/",
+//   "/bulk-whatsapp-marketing/ajman/": "/bulk-whatsapp-marketing-uae/ajman/",
+//   "/bulk-whatsapp-marketing/ras-al-khaimah/":
+//     "/bulk-whatsapp-marketing-uae/ras-al-khaimah/",
+//   "/bulk-whatsapp-marketing/al-ain/": "/bulk-whatsapp-marketing-uae/al-ain/",
+// };
+
+// app.use(async (req, res) => {
+//   const originalUrl = new URL(
+//     `${req.protocol}://${req.get("host")}${req.originalUrl}`
+//   );
+//   let path = originalUrl.pathname;
+
+//   if (!path.endsWith("/")) {
+//     originalUrl.pathname = `${path}/`;
+//     return res.redirect(301, originalUrl.toString());
+//   }
+
+//   if (redirectMap[path]) {
+//     return res.redirect(301, redirectMap[path]);
+//   }
+
+//   //   if (path === "/blogs/index.txt/") {
+//   //     return res.redirect(301, "/blogs/");
+//   //   }
+//   const indexTxtRegex = /\/index\.txt\/?$/;
+
+//   if (indexTxtRegex.test(path)) {
+//     const cleanedPath = path.replace(indexTxtRegex, "");
+//     originalUrl.pathname = cleanedPath;
+//     return res.redirect(301, originalUrl.toString());
+//   }
+//   if (
+//     path.startsWith("/blogs") &&
+//     (originalUrl.searchParams.has("teamId") ||
+//       originalUrl.searchParams.has("userId"))
+//   ) {
+//     return res.status(404).send("Not Found");
+//   }
+
+//   const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
+//   const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
+//   const targetUrl = isBlogsPath
+//     ? `https://sheetwa22.getpowerblog.com${proxyPath}${originalUrl.search}`
+//     : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
+
+//   try {
+//     const proxyRes = await fetch(targetUrl, {
+//       headers: {
+//         "User-Agent": req.headers["user-agent"] || "",
+//       },
+//     });
+
+//     const contentType = proxyRes.headers.get("content-type") || "text/html";
+//     let body = await proxyRes.text();
+
+//     // More comprehensive URL replacement to fix mixed content issues
+//     const currentDomain = `${req.protocol}://${req.get("host")}`;
+
+//     body = body
+//       // Replace any HTTP references to the blog domain
+//       .replace(/http:\/\/sheetwa22\.getpowerblog\.com/g, currentDomain)
+//       // Replace any HTTP references to your proxy domain
+//       .replace(
+//         /http:\/\/simple-node-proxy-up64\.onrender\.com/g,
+//         "https://simple-node-proxy-up64.onrender.com"
+//       )
+//       // Replace any HTTP references to the main domain (for root content)
+//       .replace(/http:\/\/sheetwa\.com/g, currentDomain)
+//       // Catch any remaining HTTP references to your current domain
+//       .replace(new RegExp(`http://${req.get("host")}`, "g"), currentDomain);
+
+//     res.set("Content-Type", contentType);
+//     res.status(proxyRes.status).send(body);
+//   } catch (err) {
+//     console.error("Proxy failed:", err);
+//     res.status(500).send("Proxy Error");
+//   }
+// });
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Render proxy server running on port ${PORT}`);
+// });
 
 
 
@@ -28,7 +119,7 @@ const redirectMap = {
 
 // Helper function to check if content type is HTML
 function isHtmlContent(contentType) {
-  return contentType && contentType.includes("text/html");
+  return contentType && contentType.includes('text/html');
 }
 
 // Helper function to check if content is static asset
@@ -57,7 +148,7 @@ function setCache(key, data, contentType) {
   cache.set(key, {
     ...data,
     timestamp: Date.now(),
-    duration,
+    duration
   });
 }
 
@@ -108,12 +199,12 @@ app.use(async (req, res) => {
     const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
     const targetUrl = isBlogsPath
       ? `http://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
-      : `https://frabjous-strudel-679542.netlify.app${originalUrl.pathname}${originalUrl.search}`;
+      : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
 
     // Check cache first
     const cacheKey = getCacheKey(targetUrl);
     const cached = getFromCache(cacheKey);
-
+    
     if (cached) {
       res.set("Content-Type", cached.contentType);
       // Forward cached headers
@@ -128,13 +219,13 @@ app.use(async (req, res) => {
     // Forward essential headers
     const forwardHeaders = {
       "User-Agent": req.headers["user-agent"] || "",
-      Accept: req.headers["accept"] || "*/*",
+      "Accept": req.headers["accept"] || "*/*",
       "Accept-Encoding": req.headers["accept-encoding"] || "",
-      Referer: req.headers["referer"] || "",
+      "Referer": req.headers["referer"] || "",
     };
 
     // Remove empty headers
-    Object.keys(forwardHeaders).forEach((key) => {
+    Object.keys(forwardHeaders).forEach(key => {
       if (!forwardHeaders[key]) delete forwardHeaders[key];
     });
 
@@ -144,7 +235,7 @@ app.use(async (req, res) => {
 
     const proxyRes = await fetch(targetUrl, {
       headers: forwardHeaders,
-      signal: controller.signal,
+      signal: controller.signal
     });
 
     clearTimeout(timeoutId);
@@ -168,28 +259,19 @@ app.use(async (req, res) => {
 
     // Preserve important response headers
     const headersToForward = {};
-    const importantHeaders = [
-      "cache-control",
-      "etag",
-      "expires",
-      "last-modified",
-    ];
-    importantHeaders.forEach((header) => {
+    const importantHeaders = ['cache-control', 'etag', 'expires', 'last-modified'];
+    importantHeaders.forEach(header => {
       const value = proxyRes.headers.get(header);
       if (value) headersToForward[header] = value;
     });
 
     // Cache the response
-    setCache(
-      cacheKey,
-      {
-        body,
-        status: proxyRes.status,
-        contentType,
-        headers: headersToForward,
-      },
-      contentType
-    );
+    setCache(cacheKey, {
+      body,
+      status: proxyRes.status,
+      contentType,
+      headers: headersToForward
+    }, contentType);
 
     // Set response headers
     res.set("Content-Type", contentType);
@@ -198,9 +280,10 @@ app.use(async (req, res) => {
     });
 
     res.status(proxyRes.status).send(body);
+
   } catch (err) {
     console.error("Proxy failed:", err);
-    if (err.name === "AbortError") {
+    if (err.name === 'AbortError') {
       res.status(504).send("Gateway Timeout");
     } else {
       res.status(500).send("Proxy Error");
