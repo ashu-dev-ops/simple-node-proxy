@@ -62,7 +62,8 @@ app.use(async (req, res) => {
       res.status(500).send("Proxy Error");
     }
   } else {
-    res.status(404).send("Not Found");
+    // res.status(404).send("Not Found");
+    res.send("Not Found");
   }
 });
 
