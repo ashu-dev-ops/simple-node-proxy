@@ -62,8 +62,20 @@ app.use(async (req, res) => {
       res.status(500).send("Proxy Error");
     }
   } else {
-    // res.status(404).send("Not Found");
-    res.send("Not Found");
+    const targetUrl = `https://sheetwa.com/`;
+
+    try {
+      const proxyRes = await fetch(targetUrl, {
+        headers: {
+          "User-Agent": req.headers["user-agent"] || "",
+        },
+      });
+
+      const contentType = proxyRes.headers.get("content-type") || "text/html";
+      const body = await proxyRes.text();
+
+      res.set("Content-Type", contentType);
+      res.status(proxyRes.status).send(body);
   }
 });
 
