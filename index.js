@@ -1,6 +1,6 @@
 const express = require("express");
 const fetch = require("node-fetch"); // npm install node-fetch@2
-const LRU = require("lru-cache"); // npm install lru-cache
+const { LRUCache } = require("lru-cache"); // Updated import
 
 const app = express();
 
@@ -16,8 +16,8 @@ const redirectMap = {
 };
 
 // ⚙️ LRU Cache Configuration
-const cache = new LRU({
-  max: 100, // maximum number of items
+const cache = new LRUCache({
+  max: 50, // maximum number of items
   ttl: 1000 * 60 * 5, // 5 minutes in milliseconds
 });
 
