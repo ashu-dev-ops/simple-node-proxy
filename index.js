@@ -58,7 +58,7 @@ app.use(async (req, res) => {
   // Proxy logic
   const proxyPath = path === "/blogs/" ? "" : path.replace(/^\/blogs/, "");
   const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
-  const targetUrl = isBlogsPath
+  let targetUrl = isBlogsPath
     ? `https://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
     : `https://testmain.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
 
@@ -69,6 +69,10 @@ app.use(async (req, res) => {
     res.set("Content-Type", contentType);
     return res.status(status).send(body);
   }
+  // if target url ends with /, remove it
+  if (targetUrl.endsWith("/")) {
+    targetUrl = targetUrl.slice(0, -1);
+  }
   console.log("Cache miss for:", targetUrl);
   try {
     const proxyRes = await fetch(targetUrl, {
@@ -76,10 +80,8 @@ app.use(async (req, res) => {
         "User-Agent": req.headers["user-agent"] || "",
       },
     });
-
     const contentType = proxyRes.headers.get("content-type") || "text/html";
     const body = await proxyRes.text();
-
     // 🧠 Store in cache
     cache.set(targetUrl, {
       body,
