@@ -60,15 +60,16 @@ app.use(async (req, res) => {
   const isBlogsPath = path === "/blogs/" || path.startsWith("/blogs/");
   const targetUrl = isBlogsPath
     ? `https://blogstest.sheetwa.com${proxyPath}${originalUrl.search}`
-    : `https://test.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
+    : `https://testmain.sheetwa.com${originalUrl.pathname}${originalUrl.search}`;
 
   // 🤖 Check cache
   if (cache.has(targetUrl)) {
+    console.log("Cache hit for:", targetUrl);
     const { body, contentType, status } = cache.get(targetUrl);
     res.set("Content-Type", contentType);
     return res.status(status).send(body);
   }
-
+  console.log("Cache miss for:", targetUrl);
   try {
     const proxyRes = await fetch(targetUrl, {
       headers: {
