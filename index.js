@@ -332,6 +332,10 @@ app.use(async (req, res) => {
   let path = originalUrl.pathname;
 
   console.log(`Incoming request: ${req.method} ${originalUrl.toString()}`);
+  console.log(`Path: "${path}", Length: ${path.length}`); // Debug log
+
+  // Handle RSC requests specially - don't redirect these
+  const isRSCRequest = originalUrl.searchParams.has("_rsc");
 
   // Force HTTPS redirect if needed - DO THIS FIRST AND PRESERVE THE FULL URL
   if (req.protocol === "http" && req.get("host") === "test.sheetwa.com") {
@@ -340,34 +344,36 @@ app.use(async (req, res) => {
     return res.redirect(301, httpsUrl);
   }
 
-  // Handle RSC requests specially - don't redirect these
-  const isRSCRequest = originalUrl.searchParams.has("_rsc");
-
-  // Hardcoded redirects (do this before trailing slash redirect)
-  if (redirectMap[path]) {
-    return res.redirect(301, redirectMap[path]);
-  }
-
-  // Clean /index.txt/ from URL (but be careful with RSC requests)
+  // Skip other redirects for RSC requests
   if (!isRSCRequest) {
+    // Hardcoded redirects (do this before trailing slash redirect)
+    if (redirectMap[path]) {
+      console.log(`Hardcoded redirect: ${path} -> ${redirectMap[path]}`);
+      return res.redirect(301, redirectMap[path]);
+    }
+
+    // Clean /index.txt/ from URL
     const indexTxtRegex = /\/index\.txt\/?$/;
     if (indexTxtRegex.test(path)) {
       const cleanedPath = path.replace(indexTxtRegex, "/");
       originalUrl.pathname = cleanedPath;
+      console.log(`Index.txt redirect: ${path} -> ${cleanedPath}`);
       return res.redirect(301, originalUrl.toString());
     }
-  }
 
-  // Trailing slash redirect (but not for RSC requests, files with extensions, or root path)
-  if (
-    !path.endsWith("/") &&
-    !path.includes(".") &&
-    !isRSCRequest &&
-    path !== "" // Don't redirect root path
-  ) {
-    originalUrl.pathname = `${path}/`;
-    console.log(`Adding trailing slash redirect: ${originalUrl.toString()}`);
-    return res.redirect(301, originalUrl.toString());
+    // FIXED: Trailing slash redirect - the key fix is here
+    if (
+      !path.endsWith("/") &&
+      !path.includes(".") &&
+      path !== "/" && // FIXED: was path !== ""
+      path.length > 1 // Additional safety check
+    ) {
+      originalUrl.pathname = `${path}/`;
+      console.log(
+        `Adding trailing slash redirect: ${path} -> ${originalUrl.pathname}`
+      );
+      return res.redirect(301, originalUrl.toString());
+    }
   }
 
   // Disallow if teamId or userId present
@@ -376,6 +382,7 @@ app.use(async (req, res) => {
     (originalUrl.searchParams.has("teamId") ||
       originalUrl.searchParams.has("userId"))
   ) {
+    console.log("Blocking request with teamId/userId");
     return res.status(404).send("Not Found");
   }
 
