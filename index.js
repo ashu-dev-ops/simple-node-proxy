@@ -35,11 +35,11 @@ app.use(async (req, res) => {
   const isRSCRequest = originalUrl.searchParams.has("_rsc");
 
   // Force HTTPS redirect if needed - DO THIS FIRST AND PRESERVE THE FULL URL
-  if (req.protocol === "http" && req.get("host") === "test.sheetwa.com") {
-    const httpsUrl = `https://${req.get("host")}${req.originalUrl}`;
-    console.log(`Redirecting to HTTPS: ${httpsUrl}`);
-    return res.redirect(301, httpsUrl);
-  }
+  // if (req.protocol === "http" && req.get("host") === "test.sheetwa.com") {
+  //   const httpsUrl = `https://${req.get("host")}${req.originalUrl}`;
+  //   console.log(`Redirecting to HTTPS: ${httpsUrl}`);
+  //   return res.redirect(301, httpsUrl);
+  // }
 
   // Skip other redirects for RSC requests
   if (!isRSCRequest) {
