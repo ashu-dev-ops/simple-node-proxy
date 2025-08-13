@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "lru-cache": "^11.1.0",
+    "node-fetch": "^3.3.2",
+    "request-ip": "^3.3.0"
+  }
+}
