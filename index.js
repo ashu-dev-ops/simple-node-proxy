@@ -236,13 +236,13 @@ const WEBSITE_URL = "https://maintest.sheetwa.com";
 const BLOG_URL = "https://blogstest.sheetwa.com";
 
 const express = require("express");
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
 const { LRUCache } = require("lru-cache");
 const rateLimit = require("express-rate-limit");
 const requestIp = require("request-ip");
 const nodePath = require("path");
 const app = express();
-
+const { ipKeyGenerator } = require("express-rate-limit");
 const redirectMap = {
   "/bulk-whatsapp-marketing/dubai/": "/bulk-whatsapp-marketing-uae/dubai/",
   "/bulk-whatsapp-marketing/sharjah/": "/bulk-whatsapp-marketing-uae/sharjah/",
@@ -297,9 +297,7 @@ app.use(
   rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 500, // limit each IP to 500 requests per windowMs
-    keyGenerator: (req, res) => {
-      return req.clientIp; // IP address from requestIp.mw(), as opposed to req.ip
-    },
+    keyGenerator: (req) => ipKeyGenerator(req),
   })
 );
 app.use(async (req, res) => {
