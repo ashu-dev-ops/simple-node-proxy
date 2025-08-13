@@ -297,7 +297,10 @@ app.use(
   rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 500, // limit each IP to 500 requests per windowMs
-    keyGenerator: (req) => ipKeyGenerator(req),
+    // keyGenerator: (req) => ipKeyGenerator(req),
+    keyGenerator: (req, res) => {
+      return req.clientIp; // IP address from requestIp.mw(), as opposed to req.ip
+    },
   })
 );
 app.use(async (req, res) => {
